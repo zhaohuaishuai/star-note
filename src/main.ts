@@ -21,6 +21,7 @@ export default class StarNote {
         header:document.createElement('div'),
         body:document.createElement('div'),
         closeBtn:document.createElement('div'),
+        resizeHandlerBtn:document.createElement('div'),
 
     }
 
@@ -42,21 +43,25 @@ export default class StarNote {
         x,y
     }:ParamsInt){
 
-        this.x = x || document.documentElement.clientWidth - this.containerWidth - 30
+        const {x : lx, y : ly} = this.getLocationPosition()
 
-        this.y = y || 30
+        this.x = lx || x || document.documentElement.clientWidth - this.containerWidth - 30
+
+        this.y = ly || y || 30
 
         this.init()
     }
 
-    init(){
+    private init(){
         const {pre,code} = this.hlContainer
         this.dom.container = document.createElement('div')
         this.dom.header = document.createElement('div')
         this.dom.body = document.createElement('div')
         this.dom.container.appendChild(this.dom.header)
         this.dom.container.appendChild(this.dom.body)
+        this.dom.container.appendChild(this.dom.resizeHandlerBtn)
         this.dom.body.appendChild(pre)
+       
         pre.appendChild(code)
         this.dom.header.appendChild(this.dom.closeBtn)
         this.dom.closeBtn.innerHTML = 'x'
@@ -64,9 +69,10 @@ export default class StarNote {
         this.initStyle()
         this.initEvent()
     }
-    initStyle(){
+    private initStyle(){
 
-        const {container,header,closeBtn,body} = this.dom
+        const {container,header,closeBtn,body,resizeHandlerBtn} = this.dom
+      
         container.style.width  =  this.containerWidth + 'px'
         container.style.height =  this.containerHeight + 'px'  
         container.style.position = 'absolute';
@@ -91,10 +97,24 @@ export default class StarNote {
         body.style.backgroundColor = 'rgb(250, 204, 21)'
         body.style.boxSizing = 'border-box'
         body.style.overflow = 'auto'
+        body.style.position = 'relative'
+
+
+        resizeHandlerBtn.style.width ='20px'
+        resizeHandlerBtn.style.height ='20px'
+        resizeHandlerBtn.style.position ='absolute'
+        resizeHandlerBtn.style.right = '0px'
+        resizeHandlerBtn.style.bottom = '0px'
+        // resizeHandlerBtn.style.backgroundColor = 'rgb(200, 204, 21)'
+        resizeHandlerBtn.style.cursor = 'se-resize'
+
+       
+
+
     }
-    oldNodeList:any[] = []
-    initEvent(){
-        const {container,header,closeBtn} = this.dom
+    private oldNodeList:any[] = []
+    private initEvent(){
+        const {container,header,closeBtn,resizeHandlerBtn} = this.dom
         const {code} = this.hlContainer
         header.onmousedown = (e:MouseEvent)=>{
 
@@ -132,7 +152,6 @@ export default class StarNote {
 
         const muob = new MutationObserver((mut)=>{
             console.log(mut[0])
-            
             if(this.oldNodeList.length === 0){
                 this.oldNodeList = Array.prototype.slice.call(mut[0].addedNodes)
                 return
@@ -180,10 +199,37 @@ export default class StarNote {
             childList:true
         })
 
+        resizeHandlerBtn.onmousedown = (e:MouseEvent)=>{
+
+           const sx = e.clientX
+           const sy = e.clientY
+
+           const crect = this.dom.container.getBoundingClientRect()
+           this.hlContainer.pre.style.userSelect = 'none'
+           window.onmousemove = (e:MouseEvent)=>{
+                const ex = e.clientX
+                const ey = e.clientY
+                const disx = ex - sx
+                const disy = ey - sy
+                const w = crect.width + disx
+                const h = crect.height + disy
+                this.containerResize(w,h)
+           }
+
+           window.onmouseup = ()=>{
+                this.hlContainer.pre.style.userSelect = 'auto'
+                window.onmousemove = null
+                window.onmouseup = null
+               
+           }
+
+        }
+        
+
         
     }
 
-    containerMove(){
+    private containerMove(){
         const { container } = this.dom
         console.log(this.x,this.y)
 
@@ -203,11 +249,16 @@ export default class StarNote {
         if(this.y > (this.scrrenHeight - this.dom.container.clientHeight)){
             this.y = this.scrrenHeight - this.dom.container.clientHeight
         }
+
         container.style.transform = `translate(${this.x}px, ${this.y}px)`
+        this.setLocalPosition()
         // container.style.left = this.x +'px'
         // container.style.top = this.y +'px'
     }
-
+    /**
+     * 数据更新
+     * @param {Object} data 
+     */
     public update(data:any){
         
 
@@ -220,86 +271,131 @@ export default class StarNote {
         this.data = data
         code.innerHTML = hj.value
     }
+
+    private LOCAL_POSITION_POSITION= 'star_note_positon'
+    /**
+     * 存储位置
+     */
+    private setLocalPosition(){
+        localStorage.setItem(this.LOCAL_POSITION_POSITION,JSON.stringify({x:this.x,y:this.y}))
+    }
+    /**
+     * 获取位置 
+     */
+    private getLocationPosition():{x:number,y:number}{
+        const res = localStorage.getItem(this.LOCAL_POSITION_POSITION)
+        if(res){
+            return JSON.parse(res)
+        }
+        return {x:this.x,y:this.y}
+    }
+    /**
+     * 销毁实例
+     */
+    public destory(){
+        this.dom.container.remove()
+    }
+    /**
+     * 变化盒子大小
+     */
+    private containerResize(w:number,h:number){
+
+        const { container } = this.dom
+
+        if(w < this.containerWidth){
+            w = this.containerWidth
+        }
+
+        if(h < this.containerHeight){
+            h = this.containerHeight
+        }
+
+
+
+        container.style.width = w + 'px'
+        container.style.height = h + 'px'
+        this.dom.body.style.height = (h - this.titleHeight) + 'px'
+    }
 }
 
 
-// const starNote = new StarNote({x:100,y:100})
-// const as = {
-//     "id": 5,
-//     "name": "",
-//     "templateId": 149,
-//     "advertiserIdList": [
-//       "1774465345162247",
-//       "1774465345776648",
-//       "1767396488101000"
-//     ],
-//     "newsCondition": [
-//       {
-//         "name": "days",
-//         "el": "eq",
-//         "value": 30,
-//         "relation": ""
-//       }
-//     ],
-//     "news": 3,
-//     "topNCondition": [
-//       {
-//         "name": "days",
-//         "el": "eq",
-//         "value": 30,
-//         "relation": ""
-//       },
-//       {
-//         "name": "stat_cost",
-//         "el": "eq",
-//         "value": 4,
-//         "relation": "and"
-//       },
-//       {
-//         "name": "convert_cost",
-//         "el": "eq",
-//         "value": 4,
-//         "relation": "and"
-//       },
-//       {
-//         "name": "convert_cnt",
-//         "el": "eq",
-//         "value": 5,
-//         "relation": ""
-//       }
-//     ],
-//     "closeCondition": [
-//       {
-//         "name": "stat_cost",
-//         "el": "",
-//         "value": 7,
-//         "relation": "or"
-//       },
-//       {
-//         "name": "click_cnt",
-//         "el": "",
-//         "value": 2,
-//         "relation": ""
-//       },
-//       {
-//         "name": "convert_cnt",
-//         "el": "",
-//         "value": 2,
-//         "relation": "and"
-//       }
-//     ],
-//     "topN": 3,
-//     "newsDeliveryTime": "06:06",
-//     "topNDeliveryTime": "01:01",
-//     "checkFrequency": 4
-//   }
-// starNote.update(as)
+const starNote = new StarNote({x:100,y:100})
+const as = {
+    "id": 5,
+    "name": "",
+    "templateId": 149,
+    "advertiserIdList": [
+      "1774465345162247",
+      "1774465345776648",
+      "1767396488101000"
+    ],
+    "newsCondition": [
+      {
+        "name": "days",
+        "el": "eq",
+        "value": 30,
+        "relation": ""
+      }
+    ],
+    "news": 3,
+    "topNCondition": [
+      {
+        "name": "days",
+        "el": "eq",
+        "value": 30,
+        "relation": ""
+      },
+      {
+        "name": "stat_cost",
+        "el": "eq",
+        "value": 4,
+        "relation": "and"
+      },
+      {
+        "name": "convert_cost",
+        "el": "eq",
+        "value": 4,
+        "relation": "and"
+      },
+      {
+        "name": "convert_cnt",
+        "el": "eq",
+        "value": 5,
+        "relation": ""
+      }
+    ],
+    "closeCondition": [
+      {
+        "name": "stat_cost",
+        "el": "",
+        "value": 7,
+        "relation": "or"
+      },
+      {
+        "name": "click_cnt",
+        "el": "",
+        "value": 2,
+        "relation": ""
+      },
+      {
+        "name": "convert_cnt",
+        "el": "",
+        "value": 2,
+        "relation": "and"
+      }
+    ],
+    "topN": 3,
+    "newsDeliveryTime": "06:06",
+    "topNDeliveryTime": "01:01",
+    "checkFrequency": 4
+  }
+starNote.update(as)
 
 
-// document.onclick =()=>{
-//     as.topN = 300
-//     starNote.update(as)
-// }
+document.onclick =()=>{
+    as.topN = 300
+    starNote.update(as)
+}
 
 
 

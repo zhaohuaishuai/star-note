@@ -62,4 +62,9 @@ export function useNote(data:Ref<any>){
 
 
 
+#### 版本迭代信息
+
+##### 0.0.6
+- 增加调整窗口大小、销毁实例、位置记忆功能。
+
 
