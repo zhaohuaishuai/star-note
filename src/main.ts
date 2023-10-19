@@ -77,7 +77,7 @@ export default class StarNote {
     private initStyle(){
 
         const {container,header,closeBtn,body,resizeHandlerBtn} = this.dom
-      
+        container.style.zIndex = '9999'
         container.style.width  =  this.containerWidth + 'px'
         container.style.height =  this.containerHeight + 'px'  
         container.style.position = 'absolute';
