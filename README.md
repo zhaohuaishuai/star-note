@@ -35,14 +35,27 @@ export function useNote(data:Ref<any>){
 
     if(import.meta.env.MODE === "development"){
 
-        const noteApp = new StarNote({y:90})
-
-         noteApp.update(data.value)
+        let noteApp :any
 
         watch(()=>data.value,()=>{
             noteApp && noteApp.update(data.value)
         },{
           deep:true  
+        })
+
+        onActivated(()=>{
+            console.log("onActivated note")
+            noteApp = new StarNote({y:90})
+            noteApp.update(data.value)
+        })
+
+        onUnmounted(() => {
+            console.log("onUnmounted note")
+            noteApp.destory()
+        });
+        onDeactivated(()=>{
+            console.log("onDeactivated note")
+            noteApp.destory()
         })
     }
 

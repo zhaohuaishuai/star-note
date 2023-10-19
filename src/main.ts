@@ -3,6 +3,7 @@ import javascript from 'highlight.js/lib/languages/javascript';
 import 'highlight.js/styles/github.css';
 hljs.registerLanguage('javascript', javascript);
 
+
 interface ParamsInt {
     x?:number,y?:number
 }
@@ -15,6 +16,7 @@ interface ParamsInt {
 export default class StarNote {
 
     data = {}
+    oldData = {}
 
     dom:Record<string,HTMLDivElement> ={
         container:document.createElement('div'),
@@ -49,19 +51,22 @@ export default class StarNote {
 
         this.y = ly || y || 30
 
+        const {w,h} = this.getLocationBoxSize()
+        this.containerWidth = w  
+        this.containerHeight = h  
+
         this.init()
     }
 
     private init(){
         const {pre,code} = this.hlContainer
-        this.dom.container = document.createElement('div')
-        this.dom.header = document.createElement('div')
-        this.dom.body = document.createElement('div')
+        // this.dom.container = document.createElement('div')
+        // this.dom.header = document.createElement('div')
+        // this.dom.body = document.createElement('div')
         this.dom.container.appendChild(this.dom.header)
         this.dom.container.appendChild(this.dom.body)
         this.dom.container.appendChild(this.dom.resizeHandlerBtn)
         this.dom.body.appendChild(pre)
-       
         pre.appendChild(code)
         this.dom.header.appendChild(this.dom.closeBtn)
         this.dom.closeBtn.innerHTML = 'x'
@@ -112,7 +117,7 @@ export default class StarNote {
 
 
     }
-    private oldNodeList:any[] = []
+    // private oldNodeList:any[] = []
     private initEvent(){
         const {container,header,closeBtn,resizeHandlerBtn} = this.dom
         const {code} = this.hlContainer
@@ -150,48 +155,56 @@ export default class StarNote {
         }
 
 
-        const muob = new MutationObserver((mut)=>{
-            console.log(mut[0])
-            if(this.oldNodeList.length === 0){
-                this.oldNodeList = Array.prototype.slice.call(mut[0].addedNodes)
-                return
-            }
-            // 节点代码分析
-            const oldNodeList =  this.oldNodeList
-            const newNodeList = Array.prototype.slice.call(mut[0].addedNodes) 
-
-            if(oldNodeList.length === newNodeList.length){
-                for(let i = 0; i < oldNodeList.length; i ++){
-
-                    console.log("oldNodeList:",oldNodeList[i].innerHTML)
-                    console.log("newNodeList:",newNodeList[i].innerHTML)
-                    if(oldNodeList[i].innerHTML !== newNodeList[i].innerHTML){
-                        console.log("new-node:",newNodeList[i])
-                        newNodeList[i].scrollIntoView({behavior:'smooth'})
-                        newNodeList[i].style.backgroundColor = '#000'
-                        newNodeList[i].style.color = '#fff'
-                        this.oldNodeList = Array.prototype.slice.call(mut[0].addedNodes)
-                        return
-                         
-                    }
-
-                }
-            }
-
-            if(oldNodeList.length < newNodeList.length){
-
-            }
-
-            if(oldNodeList.length>newNodeList.length){
-
-            }
+        const muob = new MutationObserver(()=>{
+            // console.log(mut[0])
+            // if(this.oldNodeList.length === 0){
+            //     console.log("初始化的，不做了")
+            //     this.oldNodeList = Array.prototype.slice.call(mut[0].addedNodes)
+            //     return
+            // }
+            // if(this.oldData !== this.data){
+            //     console.log("引用地址不一样，不做了")
+            //     this.oldNodeList = Array.prototype.slice.call(mut[0].addedNodes)
+            //     return
+            // }
+            // // 节点代码分析
+            // const oldNodeList =  this.oldNodeList
+            // const newNodeList = Array.prototype.slice.call(mut[0].addedNodes) 
 
 
-            this.oldNodeList = Array.prototype.slice.call(mut[0].addedNodes)
-            return
+            // if(oldNodeList.length === newNodeList.length){
+            //     for(let i = 0; i < oldNodeList.length; i ++){
+            //         if(oldNodeList[i].innerHTML !== newNodeList[i].innerHTML){
+            //             newNodeList[i].scrollIntoView({behavior:'smooth',block:'center'})
+            //             newNodeList[i].style.backgroundColor = '#000'
+            //             newNodeList[i].style.color = '#fff'
+            //             newNodeList[i].style.padding = '2px'
+            //             newNodeList[i].previousElementSibling.style.backgroundColor = '#000'
+            //             newNodeList[i].previousElementSibling.style.color = '#fff'
+            //             newNodeList[i].previousElementSibling.style.padding = '2px'
+            //         }
+
+            //     }
+            // }
+
+            // if(oldNodeList.length < newNodeList.length){
+
+            // }
+
+            // if(oldNodeList.length>newNodeList.length){
+
+            // }
 
 
-            console.log(this.oldNodeList)
+            // this.oldNodeList = Array.prototype.slice.call(mut[0].addedNodes)
+            // return
+
+            const  changeItem = Array.prototype.slice.call(this.hlContainer.code.querySelectorAll('.change-item'))
+            console.log("changeItem:",changeItem)
+            changeItem.forEach((node:HTMLSpanElement)=>{
+                node.scrollIntoView({block:'center',behavior:'smooth'})
+            })
+
         })
 
         muob.observe(code,{
@@ -224,9 +237,49 @@ export default class StarNote {
            }
 
         }
-        
 
-        
+        let oldCode:string
+        hljs.addPlugin({
+            'after:highlight':(item)=>{
+                // console.log('字符串对比：',item.code  === oldCode)
+                // console.log('引用地址对比：',this.data === this.oldData)
+                const addressIsSame = this.data === this.oldData
+                const codeIsSame = item.code  === oldCode
+                const arr = item.code?.split('\n') as string[]
+                const oldArr = !oldCode?[]:oldCode?.split('\n')
+                const notIndexs:number[] = []
+                
+                if(oldArr.length === arr.length){
+                    for(let i = 0; i < arr?.length ; i++){
+                        if(arr[i] !== oldArr[i]){
+                            notIndexs.push(i)
+                        }
+                    }
+                }
+
+                if(oldArr.length > arr.length){
+                    
+                }
+                
+                
+                console.log("notIndexs:",notIndexs)
+                const res = item.value
+                .split('\n')
+                // 增加索引
+                .map((item,index)=>`${index}.&nbsp;&nbsp;${item}`)
+                // 过滤变更的值加样式标记
+                .map((citem,index)=>{
+                    // 引用地址不一样直接换  字符一样 且 引用地址一样 直接输出不用处理
+                    if(!addressIsSame || (codeIsSame && addressIsSame)){
+                        return citem
+                    }
+                    return notIndexs.includes(index)? `<span class='change-item' style="color:#fff;background-color:black;">${citem.replace(/hljs-string|hljs-number/g,'')}</span>`: citem
+                })
+                item.value = res.join('\n')
+                oldCode = item.code as string
+                
+            }
+        })
     }
 
     private containerMove(){
@@ -255,20 +308,22 @@ export default class StarNote {
         // container.style.left = this.x +'px'
         // container.style.top = this.y +'px'
     }
+
+    
     /**
      * 数据更新
      * @param {Object} data 
      */
     public update(data:any){
         
-
-        console.log(data === this.data)
-
+        this.oldData = this.data
+        this.data = data
         const { code } = this.hlContainer
         const json = JSON.stringify(data,null,2)
-        const hj = hljs.highlightAuto(json)
+        const hj = hljs.highlight(json,{language:'javascript'})
+        
+        console.log(hj)
 
-        this.data = data
         code.innerHTML = hj.value
     }
 
@@ -296,106 +351,44 @@ export default class StarNote {
         this.dom.container.remove()
     }
     /**
+     * 盒子大小尺寸
+     */
+    private LOCAL_POSITION_BOX_SIZE = 'LOCAL_POSITION_BOX_SIZE'
+    /**
      * 变化盒子大小
      */
     private containerResize(w:number,h:number){
 
         const { container } = this.dom
 
-        if(w < this.containerWidth){
-            w = this.containerWidth
+        if(w < 100){
+            w = 100
         }
 
-        if(h < this.containerHeight){
-            h = this.containerHeight
+        if(h < 100){
+            h = 100
         }
 
 
 
         container.style.width = w + 'px'
         container.style.height = h + 'px'
+        localStorage.setItem(this.LOCAL_POSITION_BOX_SIZE,JSON.stringify({w,h}))
         this.dom.body.style.height = (h - this.titleHeight) + 'px'
+    }
+    /**
+     * 获取本地盒子大小
+     */
+    private getLocationBoxSize():{w:number,h:number}{
+        const res = localStorage.getItem(this.LOCAL_POSITION_BOX_SIZE)
+        if(res){
+            return JSON.parse(res)
+        }
+        return {w: this.containerWidth,h:this.containerHeight}
     }
 }
 
 
-const starNote = new StarNote({x:100,y:100})
-const as = {
-    "id": 5,
-    "name": "",
-    "templateId": 149,
-    "advertiserIdList": [
-      "1774465345162247",
-      "1774465345776648",
-      "1767396488101000"
-    ],
-    "newsCondition": [
-      {
-        "name": "days",
-        "el": "eq",
-        "value": 30,
-        "relation": ""
-      }
-    ],
-    "news": 3,
-    "topNCondition": [
-      {
-        "name": "days",
-        "el": "eq",
-        "value": 30,
-        "relation": ""
-      },
-      {
-        "name": "stat_cost",
-        "el": "eq",
-        "value": 4,
-        "relation": "and"
-      },
-      {
-        "name": "convert_cost",
-        "el": "eq",
-        "value": 4,
-        "relation": "and"
-      },
-      {
-        "name": "convert_cnt",
-        "el": "eq",
-        "value": 5,
-        "relation": ""
-      }
-    ],
-    "closeCondition": [
-      {
-        "name": "stat_cost",
-        "el": "",
-        "value": 7,
-        "relation": "or"
-      },
-      {
-        "name": "click_cnt",
-        "el": "",
-        "value": 2,
-        "relation": ""
-      },
-      {
-        "name": "convert_cnt",
-        "el": "",
-        "value": 2,
-        "relation": "and"
-      }
-    ],
-    "topN": 3,
-    "newsDeliveryTime": "06:06",
-    "topNDeliveryTime": "01:01",
-    "checkFrequency": 4
-  }
-starNote.update(as)
-
-
-document.onclick =()=>{
-    as.topN = 300
-    starNote.update(as)
-}
 
 
 
