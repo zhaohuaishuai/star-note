@@ -258,10 +258,33 @@ export default class StarNote {
                 }
 
                 if(oldArr.length > arr.length){
-                    
+                    for(let i = 0; i < oldArr?.length ; i++){
+                        if(arr[i] !== oldArr[i]){
+                            console.log(oldArr[i])
+                            notIndexs.push(i)
+                            break;
+                        }
+                    }
                 }
                 
-                
+
+                if(oldArr.length <  arr.length){
+                    for(let i = 0; i < arr?.length ; i++){
+                        if(arr[i] !== oldArr[i]){
+                            const objReg = /"[a-zA-Z-]+":\s*("[a-zA-Z-]*"|\d+),{0,1}/g
+                            if(objReg.test(arr[i])){
+                                console.log("这个是变了对象的")
+                                notIndexs.push(i+1)
+                                break
+                                
+                            }
+                           
+                            notIndexs.push(i)
+                            break;
+                        }
+                    }
+                }
+
                 console.log("notIndexs:",notIndexs)
                 const res = item.value
                 .split('\n')
@@ -386,7 +409,34 @@ export default class StarNote {
         }
         return {w: this.containerWidth,h:this.containerHeight}
     }
+
+    // /**
+    //  * 对象对比找出差异的字段
+    //  */
+    // diffObject(newObj:any,oldObj:any){
+
+        
+      
+    // }
+
+    // deepKeys(newObj:any){
+    //     let arr = []
+    //     if(Array.isArray(newObj)){
+    //         return arr
+    //     }
+    //     for(let key in newObj){
+    //         if(typeof newObj[key] === 'object' ){
+    //             arr.push(...this.deepKeys(newObj[key])) 
+    //         }
+    //         // console.log('key:',key,'value:',newObj[key],'type:',typeof newObj[key])
+    //         arr.push([key, newObj[key]])
+    //     }
+    //     return arr
+    // }
 }
+
+
+
 
 
 
