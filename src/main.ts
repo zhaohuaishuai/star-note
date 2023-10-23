@@ -289,14 +289,14 @@ export default class StarNote {
                 const res = item.value
                 .split('\n')
                 // 增加索引
-                .map((item,index)=>`${index}.&nbsp;&nbsp;${item}`)
+                // .map((item,index)=>`${index}.&nbsp;&nbsp;${item}`)
                 // 过滤变更的值加样式标记
                 .map((citem,index)=>{
                     // 引用地址不一样直接换  字符一样 且 引用地址一样 直接输出不用处理
                     if(!addressIsSame || (codeIsSame && addressIsSame)){
                         return citem
                     }
-                    return notIndexs.includes(index)? `<span class='change-item' style="color:#fff;background-color:black;">${citem.replace(/hljs-string|hljs-number/g,'')}</span>`: citem
+                    return notIndexs.includes(index)? `${citem.replace(/(hljs-string|hljs-number)"/g,'change-item" style="background-color:#000;color:#fff;"')}`: citem
                 })
                 item.value = res.join('\n')
                 oldCode = item.code as string
