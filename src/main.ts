@@ -294,9 +294,9 @@ export default class StarNote {
                 .map((citem,index)=>{
                     // 引用地址不一样直接换  字符一样 且 引用地址一样 直接输出不用处理
                     if(!addressIsSame || (codeIsSame && addressIsSame)){
-                        return citem
+                        return `${index}.${citem}`
                     }
-                    return notIndexs.includes(index)? `${citem.replace(/(hljs-string|hljs-number)"/g,'change-item" style="background-color:#000;color:#fff;"')}`: citem
+                    return notIndexs.includes(index)? `${index}.${citem.replace(/(hljs-string|hljs-number)"/g,'change-item" style="background-color:#000;color:#fff;"')}`: `${index}.${citem}`
                 })
                 item.value = res.join('\n')
                 oldCode = item.code as string
