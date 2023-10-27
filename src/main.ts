@@ -63,6 +63,14 @@ export default class StarNote {
         // this.dom.container = document.createElement('div')
         // this.dom.header = document.createElement('div')
         // this.dom.body = document.createElement('div')
+        const CONTAINER_ID = 'star_note_observer'
+        const prevCon = document.querySelector("#"+CONTAINER_ID)
+        if(prevCon){
+            prevCon.remove()
+
+        }
+        this.dom.container.id = CONTAINER_ID
+
         this.dom.container.appendChild(this.dom.header)
         this.dom.container.appendChild(this.dom.body)
         this.dom.container.appendChild(this.dom.resizeHandlerBtn)
@@ -80,7 +88,7 @@ export default class StarNote {
         container.style.zIndex = '9999'
         container.style.width  =  this.containerWidth + 'px'
         container.style.height =  this.containerHeight + 'px'  
-        container.style.position = 'absolute';
+        container.style.position = 'fixed';
         container.style.top ='0px'
         container.style.left = '0px'
         container.style.transform = `translate(${this.x}px, ${this.y}px)`
@@ -125,7 +133,6 @@ export default class StarNote {
 
             let sx = e.clientX
             let sy = e.clientY
-            console.log("鼠标按下：",sx,sy)
             const rect = container.getBoundingClientRect()
             window.onmousemove = (e:MouseEvent)=>{
                 let x = e.clientX
@@ -149,58 +156,14 @@ export default class StarNote {
             this.containerMove()
         }
 
-
         closeBtn.onclick =()=>{
             this.dom.container.remove()
         }
 
 
         const muob = new MutationObserver(()=>{
-            // console.log(mut[0])
-            // if(this.oldNodeList.length === 0){
-            //     console.log("初始化的，不做了")
-            //     this.oldNodeList = Array.prototype.slice.call(mut[0].addedNodes)
-            //     return
-            // }
-            // if(this.oldData !== this.data){
-            //     console.log("引用地址不一样，不做了")
-            //     this.oldNodeList = Array.prototype.slice.call(mut[0].addedNodes)
-            //     return
-            // }
-            // // 节点代码分析
-            // const oldNodeList =  this.oldNodeList
-            // const newNodeList = Array.prototype.slice.call(mut[0].addedNodes) 
-
-
-            // if(oldNodeList.length === newNodeList.length){
-            //     for(let i = 0; i < oldNodeList.length; i ++){
-            //         if(oldNodeList[i].innerHTML !== newNodeList[i].innerHTML){
-            //             newNodeList[i].scrollIntoView({behavior:'smooth',block:'center'})
-            //             newNodeList[i].style.backgroundColor = '#000'
-            //             newNodeList[i].style.color = '#fff'
-            //             newNodeList[i].style.padding = '2px'
-            //             newNodeList[i].previousElementSibling.style.backgroundColor = '#000'
-            //             newNodeList[i].previousElementSibling.style.color = '#fff'
-            //             newNodeList[i].previousElementSibling.style.padding = '2px'
-            //         }
-
-            //     }
-            // }
-
-            // if(oldNodeList.length < newNodeList.length){
-
-            // }
-
-            // if(oldNodeList.length>newNodeList.length){
-
-            // }
-
-
-            // this.oldNodeList = Array.prototype.slice.call(mut[0].addedNodes)
-            // return
-
+            
             const  changeItem = Array.prototype.slice.call(this.hlContainer.code.querySelectorAll('.change-item'))
-            console.log("changeItem:",changeItem)
             changeItem.forEach((node:HTMLSpanElement)=>{
                 node.scrollIntoView({block:'center',behavior:'smooth'})
             })
@@ -241,8 +204,7 @@ export default class StarNote {
         let oldCode:string
         hljs.addPlugin({
             'after:highlight':(item)=>{
-                // console.log('字符串对比：',item.code  === oldCode)
-                // console.log('引用地址对比：',this.data === this.oldData)
+ 
                 const addressIsSame = this.data === this.oldData
                 const codeIsSame = item.code  === oldCode
                 const arr = item.code?.split('\n') as string[]
@@ -260,7 +222,7 @@ export default class StarNote {
                 if(oldArr.length > arr.length){
                     for(let i = 0; i < oldArr?.length ; i++){
                         if(arr[i] !== oldArr[i]){
-                            console.log(oldArr[i])
+                          
                             notIndexs.push(i)
                             break;
                         }
@@ -271,12 +233,11 @@ export default class StarNote {
                 if(oldArr.length <  arr.length){
                     for(let i = 0; i < arr?.length ; i++){
                         if(arr[i] !== oldArr[i]){
+                            // 这个是变了对象的
                             const objReg = /"[a-zA-Z-]+":\s*("[a-zA-Z-]*"|\d+),{0,1}/g
                             if(objReg.test(arr[i])){
-                                console.log("这个是变了对象的")
                                 notIndexs.push(i+1)
                                 break
-                                
                             }
                            
                             notIndexs.push(i)
@@ -284,12 +245,16 @@ export default class StarNote {
                         }
                     }
                 }
-
-                console.log("notIndexs:",notIndexs)
+                const reg = /\n*\d*\./g
+ 
                 const res = item.value
                 .split('\n')
                 // 增加索引
-                // .map((item,index)=>`${index}.&nbsp;&nbsp;${item}`)
+                .map((item)=>{
+
+                    return item.replace(reg,'')
+
+                })
                 // 过滤变更的值加样式标记
                 .map((citem,index)=>{
                     // 引用地址不一样直接换  字符一样 且 引用地址一样 直接输出不用处理
@@ -307,7 +272,7 @@ export default class StarNote {
 
     private containerMove(){
         const { container } = this.dom
-        console.log(this.x,this.y)
+ 
 
         if(this.x<0){
             this.x = 0
@@ -345,7 +310,7 @@ export default class StarNote {
         const json = JSON.stringify(data,null,2)
         const hj = hljs.highlight(json,{language:'javascript'})
         
-        console.log(hj)
+     
 
         code.innerHTML = hj.value
     }
@@ -409,30 +374,6 @@ export default class StarNote {
         }
         return {w: this.containerWidth,h:this.containerHeight}
     }
-
-    // /**
-    //  * 对象对比找出差异的字段
-    //  */
-    // diffObject(newObj:any,oldObj:any){
-
-        
-      
-    // }
-
-    // deepKeys(newObj:any){
-    //     let arr = []
-    //     if(Array.isArray(newObj)){
-    //         return arr
-    //     }
-    //     for(let key in newObj){
-    //         if(typeof newObj[key] === 'object' ){
-    //             arr.push(...this.deepKeys(newObj[key])) 
-    //         }
-    //         // console.log('key:',key,'value:',newObj[key],'type:',typeof newObj[key])
-    //         arr.push([key, newObj[key]])
-    //     }
-    //     return arr
-    // }
 }
 
 
