@@ -11,7 +11,7 @@
 #### 实现思路
 ![/assets/1.png](assets/1.png)
 
-开发中用到的技术
+**开发中用到的技术**
 
 js原生 es6 `Class`封装
 `highlight.js` 代码高亮
@@ -29,55 +29,27 @@ DOM中有节点变化的时候可以监听到，并对监听到新的更改NodeL
 ` yarn add star-note `
 
 ##### 使用
-在vue中封装hook方法
-``` javascript 
-export function useNote(data:Ref<any>){
-
-    if(import.meta.env.MODE === "development"){
-
-        let noteApp :any
-
-        watch(()=>data.value,()=>{
-            noteApp && noteApp.update(data.value)
-        },{
-          deep:true  
-        })
-
-        onActivated(()=>{
-            console.log("onActivated note")
-            noteApp = new StarNote({y:90})
-            noteApp.update(data.value)
-        })
-
-        onUnmounted(() => {
-            console.log("onUnmounted note")
-            noteApp.destory()
-        });
-        onDeactivated(()=>{
-            console.log("onDeactivated note")
-            noteApp.destory()
-        })
-    }
-
-    return 
-}
-````
+在vue3中使用
+```javascript
+import { useVue3Note } from 'star-note/dist/main.js'
+const groupGroupOptions = ref<any>({})
+useNote(groupGroupOptions)
+```
+ 
 
 
 
-#### 待完善
+#### 功能
 
 1. 窗口可以调整大小功能
 2. 记忆上次的位置功能
+3. vue3自定义封装hooks函数
 
 
 
 
 
 
-#### 版本迭代信息
 
-##### 0.0.6
-- 增加调整窗口大小、销毁实例、位置记忆功能。
 
 

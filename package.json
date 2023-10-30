@@ -1,6 +1,6 @@
 {
   "name": "star-note",
-  "version": "0.1.5",
+  "version": "0.2.0",
   "type": "module",
   "main": "dist/main.js",
   "module": "dist/main.umd.cjs",
@@ -16,8 +16,7 @@
     "publish1": "npm publish --registry https://registry.npmjs.org"
   },
   "dependencies": {
-    "highlight.js": "^11.9.0",
-    "vue": "^3.3.7"
+    "highlight.js": "^11.9.0"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^4.2.3",
@@ -26,5 +25,8 @@
     "vite": "^4.4.5",
     "vite-plugin-dts": "^3.6.0",
     "vue-tsc": "^1.8.5"
+  },
+  "peerDependencies": {
+    "vue": "^3.3.7"
   }
 }
