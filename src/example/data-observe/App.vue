@@ -11,10 +11,9 @@
 </template>
 <script setup lang="ts" >
 import {ref} from 'vue'
-import {useNote} from './hook/note/note'
-import {as} from './index'
+import {useNote} from '../../hook/note/note'
+import {as} from './data'
 const formData = ref<any>(as)
- 
 useNote(formData)
 </script>
 <style scoped ></style>

@@ -1,6 +1,6 @@
 import { App,watch,Ref,onUnmounted,onActivated,onDeactivated, onMounted } from 'vue'
 
-import StarNote from '../../main'
+import StarNote from '../../core/note'
 export interface FunctionResult {app:App<Element>|null,update:(text:object)=>void}
 
 export function useNote(data:Ref<any>){
