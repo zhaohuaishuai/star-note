@@ -6,10 +6,13 @@
 #### 背景
 在前端的开发工作中经常会遇到调试表单数据的需求，表单字段一但增加到100多个的大表单时，就会为找视图上面的每个字段的key值而耗费一定的时间和精力，也会经常遇到字段和视图的label错位的情况。
 基于上述问题，在开发的时间，我经常会在边上另外写一个浮动的盒子，将一个大表单的数据对象使用 `JSON.stringify`和`<pre>`将数据格式到这个盒子中，以便在观察数据的变化。便于提高开发调试效率。
-在不断的使用和顺手优化中，便想到，我遇到这样问题，那么别人也会在开发过程中。遇到这样的问题。于是，顺手把这个组件抽离出来，上传的NPM上，让大家使用。
+在不断的使用和优化中，就把这个组件抽离出来，上传的NPM上。
 
 #### 实现思路
 ![/assets/1.png](assets/1.png)
+
+#### 展示效果
+![/assets/Snipaste_2023-10-30_11-30-37.png](assets/Snipaste_2023-10-30_11-30-37.png)
 
 **开发中用到的技术**
 
@@ -35,6 +38,19 @@ import { useVue3Note } from 'star-note/dist/main.js'
 const groupGroupOptions = ref<any>({})
 useNote(groupGroupOptions)
 ```
+在原生js环境使用
+```javascript
+import StarNote from 'star-note/dist/main.js'
+
+const noteApp = new StarNote({y:90})
+
+const data = {a:'1',b:'2'}
+
+// 初始化数据，也是更新数据，可以在事件监听中，不断调用这个函数
+noteApp.update(data)
+
+
+```
  
 
 
@@ -43,7 +59,8 @@ useNote(groupGroupOptions)
 
 1. 窗口可以调整大小功能
 2. 记忆上次的位置功能
-3. vue3自定义封装hooks函数
+3. 自动滚动到当前使用修改的位置，并标记功能
+4. vue3自定义封装hooks函数
 
 
 
