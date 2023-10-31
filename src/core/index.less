@@ -3,11 +3,12 @@
     --bg-color-bar:#181818;
     --border-color:#2a2a2a;
     --btn-red-color:#e81123;
-    --box-shadow-color:#d9d9d9;
+    --box-shadow-color:#27262660;
     --code-index-color:#8cdcda;
     --copy-success-text:'复制成功';
     --copy-btn-text:'点击复制';
 }
+
 
 .star-container {
     width: 320px;
@@ -18,7 +19,6 @@
         width: 100%;
         cursor: move;
         display: flex;
-        
         box-sizing: border-box;
         justify-content: space-between;
         align-items: center;
@@ -97,11 +97,13 @@
 
 .star-container.theme-1 {
     
-    
-
+    box-shadow: 2px 2px 8px var(--box-shadow-color);
+    border-radius: 8px;
+    overflow: hidden;
     .header {
         background-color: var(--bg-color-bar);
         border-bottom: 1px solid var(--border-color);
+        box-shadow: 0px 1px 6px gainsboro inset;
         .close {
             color:#cccccc;
             font-size: 17px;
@@ -118,7 +120,7 @@
         --sb-size: 18px;
         scrollbar-color: var(--sb-thumb-color) 
                         var(--sb-track-color);
-        box-shadow: 2px 2px 8px var(--box-shadow-color);
+       
         &::-webkit-scrollbar {
             width: var(--sb-size);
           
