@@ -1,6 +1,8 @@
 import hljs from 'highlight.js/lib/core';
 import javascript from 'highlight.js/lib/languages/javascript';
-import 'highlight.js/styles/github.css';
+import 'highlight.js/styles/a11y-dark.min.css';
+import './index.less'
+
 hljs.registerLanguage('javascript', javascript);
 
 
@@ -21,8 +23,10 @@ export default class StarNote {
     dom:Record<string,HTMLDivElement> ={
         container:document.createElement('div'),
         header:document.createElement('div'),
+
         body:document.createElement('div'),
         closeBtn:document.createElement('div'),
+        logoBtn:document.createElement('div'),
         resizeHandlerBtn:document.createElement('div'),
 
     }
@@ -76,7 +80,9 @@ export default class StarNote {
         this.dom.container.appendChild(this.dom.resizeHandlerBtn)
         this.dom.body.appendChild(pre)
         pre.appendChild(code)
+        this.dom.header.appendChild(this.dom.logoBtn)
         this.dom.header.appendChild(this.dom.closeBtn)
+        
         this.dom.closeBtn.innerHTML = 'x'
         document.body.appendChild(this.dom.container)
         this.initStyle()
@@ -84,7 +90,11 @@ export default class StarNote {
     }
     private initStyle(){
 
-        const {container,header,closeBtn,body,resizeHandlerBtn} = this.dom
+        const {container,header,closeBtn,body,resizeHandlerBtn,logoBtn} = this.dom
+        container.classList.add('star-container','theme-1')
+        header.classList.add('header')
+        closeBtn.classList.add('close')
+        logoBtn.classList.add('logo')
         container.style.zIndex = '9999'
         container.style.width  =  this.containerWidth + 'px'
         container.style.height =  this.containerHeight + 'px'  
@@ -93,37 +103,9 @@ export default class StarNote {
         container.style.left = '0px'
         container.style.transform = `translate(${this.x}px, ${this.y}px)`
         header.style.height = this.titleHeight + 'px'
-        header.style.display = 'flex'
-        header.style.justifyContent = 'flex-end';
-        header.style.backgroundColor = 'rgb(234, 179, 8)';
-        header.style.padding = '0px 10px 0px 10px'
-        header.style.alignItems = 'center'
-        header.style.cursor = 'move'
-
-        closeBtn.style.width = '12px'
-        closeBtn.style.height = '12px'
-        closeBtn.style.lineHeight = '12px'
-        closeBtn.style.cursor = 'pointer'
-        closeBtn.style.userSelect = 'none'
+        body.classList.add('body')
         body.style.height = (this.containerHeight - this.titleHeight) + 'px'
-        body.style.padding = '20px'
-        body.style.backgroundColor = 'rgb(250, 204, 21)'
-        body.style.boxSizing = 'border-box'
-        body.style.overflow = 'auto'
-        body.style.position = 'relative'
-
-
-        resizeHandlerBtn.style.width ='20px'
-        resizeHandlerBtn.style.height ='20px'
-        resizeHandlerBtn.style.position ='absolute'
-        resizeHandlerBtn.style.right = '0px'
-        resizeHandlerBtn.style.bottom = '0px'
-        // resizeHandlerBtn.style.backgroundColor = 'rgb(200, 204, 21)'
-        resizeHandlerBtn.style.cursor = 'se-resize'
-
-       
-
-
+        resizeHandlerBtn.classList.add("drag-controll")
     }
     // private oldNodeList:any[] = []
     private initEvent(){
@@ -251,9 +233,7 @@ export default class StarNote {
                 .split('\n')
                 // 增加索引
                 .map((item)=>{
-
                     return item.replace(reg,'')
-
                 })
                 // 过滤变更的值加样式标记
                 .map((citem,index)=>{
@@ -261,13 +241,46 @@ export default class StarNote {
                     if(!addressIsSame || (codeIsSame && addressIsSame)){
                         return `${index}.${citem}`
                     }
-                    return notIndexs.includes(index)? `${index}.${citem.replace(/(hljs-string|hljs-number)"/g,'change-item" style="background-color:#000;color:#fff;"')}`: `${index}.${citem}`
+                    return notIndexs.includes(index)? `${index}.${citem.replace(/(hljs-string|hljs-number)"/g,'change-item" ')}`: `${index}.${citem}`
                 })
                 item.value = res.join('\n')
                 oldCode = item.code as string
                 
             }
         })
+
+
+
+        code.addEventListener('click',(e:Event)=>{
+           
+            if(!(e.target && ['hljs-string','hljs-number','change-item'].includes((e.target as HTMLSpanElement).className))){
+                return
+            }
+            const targetEl = e.target as HTMLSpanElement
+
+            console.log(targetEl.innerText.replace(/"/g,''))
+
+            navigator.clipboard.writeText(targetEl.innerText.replace(/"/g,'')).then(()=>{
+
+                targetEl.setAttribute('copy-text','复制成功')
+
+                setTimeout(()=>{
+                    targetEl.removeAttribute('copy-text')
+                   
+                },1000)
+
+            }).catch((err)=>{
+                console.log("复制失败：",err)
+                targetEl.setAttribute('copy-text','复制失败')
+                setTimeout(()=>{
+                    targetEl.removeAttribute('copy-text')
+                },1000)
+            })
+
+        })
+
+
+
     }
 
     private containerMove(){

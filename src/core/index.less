@@ -1,0 +1,159 @@
+:root {
+    --bg-color-body:#1f1f1f;
+    --bg-color-bar:#181818;
+    --border-color:#2a2a2a;
+    --btn-red-color:#e81123;
+    --box-shadow-color:#d9d9d9;
+    --code-index-color:#8cdcda;
+    --copy-success-text:'复制成功';
+    --copy-btn-text:'点击复制';
+}
+
+.star-container {
+    width: 320px;
+    height: 520px;
+    position: relative;
+    .header {
+        height: 32px;
+        width: 100%;
+        cursor: move;
+        display: flex;
+        
+        box-sizing: border-box;
+        justify-content: space-between;
+        align-items: center;
+        .logo {
+            width: 26px;
+            height: 26px;
+            background-image: url('./logo.png');
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: 100%;
+            border-radius: 16px;
+            overflow: hidden;
+        }
+        .close {
+            width:38px;
+            height: 32px;
+            line-height: 32px;
+            text-align: center;
+            box-sizing: border-box;
+        }
+    
+        .close:hover {
+            cursor: pointer;
+        }
+        
+    }
+   
+
+    .drag-controll {
+        position:absolute;
+        width: 10px;
+        height: 10px;
+        right: 0px;
+        bottom: 0px;
+        cursor:se-resize
+    }
+
+    .body {
+        height: calc(100% - 20px - 32px);
+        overflow: auto;
+        box-sizing: border-box;
+        position: relative;
+        padding:20px;
+        pre {
+            code {
+               
+                .change-item {
+                   padding: 1px 2px;
+                }
+
+                .hljs-string,.hljs-number,.change-item {
+                    cursor: pointer;
+                    position: relative;
+                    &:hover {
+                        background-color: rgba(255,255,255,0.1);
+                    }
+                    &:hover::after {
+                        content: attr(copy-text);
+                        display: block;
+                        position:absolute;
+                        right: 0px;
+                        top:-20px;
+                        color:rgba(255,255,255,0.6);
+                        
+                    }
+                }
+            }
+        }
+    }
+    .footer {
+        height: 20px;
+        width: 100%;
+    }
+}
+
+
+.star-container.theme-1 {
+    
+    
+
+    .header {
+        background-color: var(--bg-color-bar);
+        border-bottom: 1px solid var(--border-color);
+        .close {
+            color:#cccccc;
+            font-size: 17px;
+            transition: background-color 0.2s linear;
+        }
+        .close:hover {
+            background-color: var(--btn-red-color);
+        }
+    }
+    .body {
+        background-color: var(--bg-color-body);
+        --sb-track-color: #1f1f1f;
+        --sb-thumb-color: #232E33;
+        --sb-size: 18px;
+        scrollbar-color: var(--sb-thumb-color) 
+                        var(--sb-track-color);
+        box-shadow: 2px 2px 8px var(--box-shadow-color);
+        &::-webkit-scrollbar {
+            width: var(--sb-size);
+          
+        }
+        &::-webkit-scrollbar-track {
+            background: var(--sb-track-color);
+            border-radius: 1px;
+            
+
+        }
+        &::-webkit-scrollbar-thumb {
+            background: var(--sb-thumb-color);
+            border-radius: 1px;
+            border: 2px solid #35373a;
+            cursor: pointer;
+        }
+        pre {
+            code {
+                color:var(--code-index-color);
+                .change-item {
+                    background-color: rgba(217, 28, 28, 0.527);
+                    border-radius: 2px;
+                    color:#fff;
+                }
+            }
+        }
+    }
+    .footer {
+        border-top: 1px solid var(--border-color);
+        background-color: var(--bg-color-bar);
+
+    }
+    .drag-controll {
+       
+        background-color:transparent;
+
+    }
+}

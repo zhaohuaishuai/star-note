@@ -1,6 +1,6 @@
 {
   "name": "star-note",
-  "version": "0.2.0",
+  "version": "0.2.2",
   "type": "module",
   "main": "dist/main.js",
   "module": "dist/main.umd.cjs",
@@ -20,6 +20,7 @@
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^4.2.3",
+    "less": "^4.2.0",
     "path": "^0.12.7",
     "typescript": "^5.0.2",
     "vite": "^4.4.5",

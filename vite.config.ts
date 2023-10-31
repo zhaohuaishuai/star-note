@@ -10,14 +10,6 @@ export default defineConfig({
       entry: resolve(__dirname,'./src/main.ts'),
       name:'StarNote',
       fileName:'main'
-    },
-    rollupOptions: {
-      external: ['vue'],
-      output: {
-        globals: {
-          vue: 'Vue'
-        }
-      }
     }
   },
   
