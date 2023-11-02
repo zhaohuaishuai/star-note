@@ -170,8 +170,12 @@ export default class StarNote {
             this.hlContainer.code.querySelectorAll('.hljs-string,.hljs-number,.change-item').forEach((node:HTMLSpanElement)=>{
                 node.addEventListener('mouseenter',(ev:MouseEvent)=>{
                     const target = ev.target as HTMLSpanElement
-                    const x = ev.clientX
-                    const y = ev.clientY
+                    let x = ev.clientX
+                    let y = ev.clientY
+                    const {x:dx,y:dy} = this.dom.container.getBoundingClientRect()
+                    x -= dx-10;
+                    y -= dy-10;
+                   
                    
                     if(target){
                         type keyType = keyof typeof this.shadowPathData
