@@ -1,10 +1,10 @@
 import hljs from 'highlight.js/lib/core';
 import javascript from 'highlight.js/lib/languages/javascript';
+import tp from 'highlight.js/lib/languages/tp.js'
 import 'highlight.js/styles/a11y-dark.min.css';
 import './index.less'
-
 hljs.registerLanguage('javascript', javascript);
-
+hljs.registerLanguage('tp',tp)
 
 interface ParamsInt {
     x?:number,y?:number
@@ -23,11 +23,13 @@ export default class StarNote {
     dom:Record<string,HTMLDivElement> ={
         container:document.createElement('div'),
         header:document.createElement('div'),
-
         body:document.createElement('div'),
         closeBtn:document.createElement('div'),
         logoBtn:document.createElement('div'),
         resizeHandlerBtn:document.createElement('div'),
+        footer:document.createElement('div'),
+        popInfo:document.createElement('div')
+
 
     }
 
@@ -42,6 +44,7 @@ export default class StarNote {
     containerWidth:number = 300
     containerHeight:number = 420
     titleHeight:number = 30
+    footerHeight:number = 30
     x:number = document.documentElement.clientWidth - this.containerWidth - 30
     y:number = 30
 
@@ -77,7 +80,15 @@ export default class StarNote {
 
         this.dom.container.appendChild(this.dom.header)
         this.dom.container.appendChild(this.dom.body)
+        this.dom.container.appendChild(this.dom.footer)
         this.dom.container.appendChild(this.dom.resizeHandlerBtn)
+        this.dom.container.appendChild(this.dom.popInfo)
+        this.dom.popInfo.innerHTML = `<ul>
+                                            <li>
+                                            <span>路径：</span>
+                                            <span class="hljs-string">0.name.cat</span>
+                                            </li>
+                                        </ul>`
         this.dom.body.appendChild(pre)
         pre.appendChild(code)
         this.dom.header.appendChild(this.dom.logoBtn)
@@ -90,11 +101,16 @@ export default class StarNote {
     }
     private initStyle(){
 
-        const {container,header,closeBtn,body,resizeHandlerBtn,logoBtn} = this.dom
+        const {container,header,closeBtn,body,resizeHandlerBtn,logoBtn,footer,popInfo} = this.dom
+        popInfo.classList.add('pop-info')
+
         container.classList.add('star-container','theme-1')
         header.classList.add('header')
+        footer.classList.add('footer')
         closeBtn.classList.add('close')
         logoBtn.classList.add('logo')
+
+        footer.style.height = this.footerHeight + 'px'
         container.style.zIndex = '9999'
         container.style.width  =  this.containerWidth + 'px'
         container.style.height =  this.containerHeight + 'px'  
@@ -104,7 +120,9 @@ export default class StarNote {
         container.style.transform = `translate(${this.x}px, ${this.y}px)`
         header.style.height = this.titleHeight + 'px'
         body.classList.add('body')
-        body.style.height = (this.containerHeight - this.titleHeight) + 'px'
+        body.style.height = (this.containerHeight - this.titleHeight - this.footerHeight) + 'px'
+        
+        
         resizeHandlerBtn.classList.add("drag-controll")
     }
     // private oldNodeList:any[] = []
@@ -112,7 +130,6 @@ export default class StarNote {
         const {container,header,closeBtn,resizeHandlerBtn} = this.dom
         const {code} = this.hlContainer
         header.onmousedown = (e:MouseEvent)=>{
-
             let sx = e.clientX
             let sy = e.clientY
             const rect = container.getBoundingClientRect()
@@ -150,6 +167,26 @@ export default class StarNote {
                 node.scrollIntoView({block:'center',behavior:'smooth'})
             })
 
+            this.hlContainer.code.querySelectorAll('.hljs-string,.hljs-number,.change-item').forEach((node:HTMLSpanElement)=>{
+                node.addEventListener('mouseenter',(ev:MouseEvent)=>{
+                    const target = ev.target as HTMLSpanElement
+                    const x = ev.clientX
+                    const y = ev.clientY
+                   
+                    if(target){
+                        type keyType = keyof typeof this.shadowPathData
+                        const path = this.shadowPathData[target.dataset.index as keyType] as string
+                        const reg = /\s*".+":\s"(.+)",{0,}/g
+                        const reg1= /\s*"(.+)": (\[|\{)/g
+                        this.dom.popInfo.classList.add('active')
+                        this.dom.popInfo.style.transform = `translate(${x}px, ${y}px)`
+                        this.setPath(path.replace(reg,"$1").replace(reg1,"$1"))
+                    }
+                })
+                node.addEventListener('mouseleave',()=>{
+                    this.dom.popInfo.classList.remove('active')
+                })
+            })
         })
 
         muob.observe(code,{
@@ -183,16 +220,17 @@ export default class StarNote {
 
         }
 
+        
+
         let oldCode:string
         hljs.addPlugin({
             'after:highlight':(item)=>{
- 
+                if(item.language === 'tp')return item
                 const addressIsSame = this.data === this.oldData
                 const codeIsSame = item.code  === oldCode
                 const arr = item.code?.split('\n') as string[]
                 const oldArr = !oldCode?[]:oldCode?.split('\n')
                 const notIndexs:number[] = []
-                
                 if(oldArr.length === arr.length){
                     for(let i = 0; i < arr?.length ; i++){
                         if(arr[i] !== oldArr[i]){
@@ -200,18 +238,14 @@ export default class StarNote {
                         }
                     }
                 }
-
                 if(oldArr.length > arr.length){
                     for(let i = 0; i < oldArr?.length ; i++){
                         if(arr[i] !== oldArr[i]){
-                          
                             notIndexs.push(i)
                             break;
                         }
                     }
                 }
-                
-
                 if(oldArr.length <  arr.length){
                     for(let i = 0; i < arr?.length ; i++){
                         if(arr[i] !== oldArr[i]){
@@ -221,19 +255,26 @@ export default class StarNote {
                                 notIndexs.push(i+1)
                                 break
                             }
-                           
                             notIndexs.push(i)
                             break;
                         }
                     }
                 }
                 const reg = /\n*\d*\./g
- 
+                const keyReg = /(?<=<span class="hljs-string")(?=>&quot;(.*)&quot;<\/span>:)/g
+                const valueReg = /(?<=: <span class="(hljs-number|hljs-string)")(?=>(.*)<\/span>)/g
+                const arrayReg = /(?<=\[\s*)(\d+\.\s+{{0,1}<span class="(hljs-string|hljs-number)"(>).+<\/span>,*\s*)+\s(?=\d+\.\s+\])/g
+
                 const res = item.value
                 .split('\n')
                 // 增加索引
                 .map((item)=>{
                     return item.replace(reg,'')
+                })
+                // key 和 value 打标
+                .map((item,index)=>{
+                    return item.replace(keyReg,` data-atr="key" data-index=${index} `)
+                    .replace(valueReg,` data-atr="value" data-index=${index} `)
                 })
                 // 过滤变更的值加样式标记
                 .map((citem,index)=>{
@@ -243,9 +284,13 @@ export default class StarNote {
                     }
                     return notIndexs.includes(index)? `${index}.${citem.replace(/(hljs-string|hljs-number)"/g,'change-item" ')}`: `${index}.${citem}`
                 })
-                item.value = res.join('\n')
+                item.value = res.join('\n').replace(arrayReg,(item)=>{
+                    return item.split('\n').map((citem,index)=>{
+                        const reg = /(?<=\d+\.\s+<span class="(hljs-number|hljs-string)")>/g
+                        return citem.replace(reg,' data-atr="arry-value-'+ index +'">')
+                    }).join('\n')
+                })
                 oldCode = item.code as string
-                
             }
         })
 
@@ -257,20 +302,17 @@ export default class StarNote {
                 return
             }
             const targetEl = e.target as HTMLSpanElement
-
-            console.log(targetEl.innerText.replace(/"/g,''))
-
+            
             navigator.clipboard.writeText(targetEl.innerText.replace(/"/g,'')).then(()=>{
 
                 targetEl.setAttribute('copy-text','复制成功')
 
                 setTimeout(()=>{
                     targetEl.removeAttribute('copy-text')
-                   
                 },1000)
 
             }).catch((err)=>{
-                console.log("复制失败：",err)
+           
                 targetEl.setAttribute('copy-text','复制失败')
                 setTimeout(()=>{
                     targetEl.removeAttribute('copy-text')
@@ -278,6 +320,9 @@ export default class StarNote {
             })
 
         })
+
+
+        
 
 
 
@@ -310,6 +355,7 @@ export default class StarNote {
         // container.style.top = this.y +'px'
     }
 
+    private shadowPathData:string[] = []
     
     /**
      * 数据更新
@@ -320,11 +366,16 @@ export default class StarNote {
         this.oldData = this.data
         this.data = data
         const { code } = this.hlContainer
+        
+        // 克隆一个影子对象,他的值存成属性的路径
+        const jsonshadowpath = JSON.stringify(this.addPath(JSON.parse(JSON.stringify(data))),null,2)
+        const shadowPathhj = hljs.highlight(jsonshadowpath,{language:'tp'})
+        this.shadowPathData = shadowPathhj.code?.split('\n') as string[]
         const json = JSON.stringify(data,null,2)
         const hj = hljs.highlight(json,{language:'javascript'})
-        
-     
+       
 
+       
         code.innerHTML = hj.value
     }
 
@@ -370,12 +421,10 @@ export default class StarNote {
             h = 100
         }
 
-
-
         container.style.width = w + 'px'
         container.style.height = h + 'px'
         localStorage.setItem(this.LOCAL_POSITION_BOX_SIZE,JSON.stringify({w,h}))
-        this.dom.body.style.height = (h - this.titleHeight) + 'px'
+        this.dom.body.style.height = (h - this.titleHeight - this.footerHeight) + 'px'
     }
     /**
      * 获取本地盒子大小
@@ -386,6 +435,32 @@ export default class StarNote {
             return JSON.parse(res)
         }
         return {w: this.containerWidth,h:this.containerHeight}
+    }
+
+
+    public addPath(obj:any, path:any[] = []) {
+        if (Array.isArray(obj)) {
+            obj.map((item, idx) => this.addPath(item, [...path, idx]))
+        } else if (typeof obj === "object") {
+            // obj[objectPathKey] = path;
+            for (const key in obj) {
+                obj[key] = this.addPath(obj[key], [...path, key])
+            }
+        }
+        if(typeof obj !== 'object' && !Array.isArray(obj)){
+            obj = path.join(".")
+        }
+    
+        return obj
+    }
+
+    setPath(path:string){
+
+        const pathel = this.dom.popInfo.querySelector('ul li:nth-child(1) span:nth-child(2)') as HTMLSpanElement
+        
+        if(pathel){
+            pathel.innerText = path
+        }
     }
 }
 

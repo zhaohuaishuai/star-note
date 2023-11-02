@@ -12,8 +12,9 @@
 <script setup lang="ts" >
 import {ref} from 'vue'
 import {useNote} from '../../hook/note/note'
-import {as} from './data'
+import {as,ab} from './data'
 const formData = ref<any>(as)
 useNote(formData)
+
 </script>
 <style scoped ></style>

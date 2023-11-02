@@ -13,7 +13,7 @@
 .star-container {
     width: 320px;
     height: 520px;
-    position: relative;
+    
     .header {
         height: 32px;
         width: 100%;
@@ -38,6 +38,13 @@
             line-height: 32px;
             text-align: center;
             box-sizing: border-box;
+            position: relative;
+            &::after {
+                display: block;
+                content: '×';
+                font-size: 16px;
+            }
+
         }
     
         .close:hover {
@@ -57,7 +64,7 @@
     }
 
     .body {
-        height: calc(100% - 20px - 32px);
+        height: calc(100% - 30px - 32px);
         overflow: auto;
         box-sizing: border-box;
         position: relative;
@@ -89,8 +96,21 @@
         }
     }
     .footer {
-        height: 20px;
+        height: 30px;
         width: 100%;
+    }
+
+    .pop-info {
+        position:fixed;
+        width:230px;
+        background-color: #fff;
+        top:0px;
+        left:0px;
+        ul {
+            li {
+                list-style: none;
+            }
+        }
     }
 }
 
@@ -158,4 +178,53 @@
         background-color:transparent;
 
     }
+    .pop-info.active {
+        display: block;
+    }
+    .pop-info {
+
+        display: none;
+        background-color: var(--bg-color-body);
+        border:1px solid #444444;
+        border-radius: 4px;
+        padding:5px;
+        box-sizing: border-box;
+        ul {
+            margin:0;
+            padding:0;
+            box-sizing: border-box;
+            li {
+                list-style: none;
+                color:#c4c4c4;
+                font-size: 12px;
+                height: 20px;
+                line-height: 20px;
+                cursor: pointer;
+                box-sizing: border-box;
+                padding: 0px 15px;
+                &:hover {
+                    border-radius: 4px;
+                    background-color: #323232;
+                }
+                span:nth-child(1) {
+                    position: relative;
+                    &::after {
+                        --size:4px;
+                        display: block;
+                        content: '';
+                        position:absolute;
+                        width: var(--size);
+                        height: var(--size);
+                        background-color: #abe338;
+                        border-radius: 50%;
+                        top:6px;
+                        left:-6px;
+
+                    }
+                }
+            }
+        }
+    }
+
+
 }
