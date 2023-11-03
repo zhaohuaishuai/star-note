@@ -167,9 +167,10 @@ export default class StarNote {
                 node.scrollIntoView({block:'center',behavior:'smooth'})
             })
 
-            this.hlContainer.code.querySelectorAll('.hljs-string,.hljs-number,.change-item').forEach((node:HTMLSpanElement)=>{
+            this.hlContainer.code.querySelectorAll('.hljs-string,.hljs-number,.change-item').forEach((node:any)=>{
                 node.addEventListener('mouseenter',(ev:MouseEvent)=>{
                     const target = ev.target as HTMLSpanElement
+                    
                     let x = ev.clientX
                     let y = ev.clientY
                     const {x:dx,y:dy} = this.dom.container.getBoundingClientRect()
@@ -179,12 +180,25 @@ export default class StarNote {
                    
                     if(target){
                         type keyType = keyof typeof this.shadowPathData
-                        const path = this.shadowPathData[target.dataset.index as keyType] as string
+                        let path = this.shadowPathData[target.dataset.index as keyType] as string
                         const reg = /\s*".+":\s"(.+)",{0,}/g
                         const reg1= /\s*"(.+)": (\[|\{)/g
+                        const arrResReg = /(?<=\s*")(.+\.\d)(?=",{0,1})/g
+ 
+
                         this.dom.popInfo.classList.add('active')
                         this.dom.popInfo.style.transform = `translate(${x}px, ${y}px)`
-                        this.setPath(path.replace(reg,"$1").replace(reg1,"$1"))
+                        if(reg.test(path)){
+                            path = path.replace(reg,"$1")
+                        }else if(reg1.test(path)){
+                            path = path.
+                            replace(reg1,"$1")
+                        }else if(arrResReg.test(path)){
+                            path = path.
+                            replace(arrResReg,"$1")
+                        }
+                        
+                        this.setPath( path )
                     }
                 })
                 node.addEventListener('mouseleave',()=>{
@@ -229,7 +243,9 @@ export default class StarNote {
         let oldCode:string
         hljs.addPlugin({
             'after:highlight':(item)=>{
+
                 if(item.language === 'tp')return item
+                
                 const addressIsSame = this.data === this.oldData
                 const codeIsSame = item.code  === oldCode
                 const arr = item.code?.split('\n') as string[]
@@ -265,9 +281,9 @@ export default class StarNote {
                     }
                 }
                 const reg = /\n*\d*\./g
-                const keyReg = /(?<=<span class="hljs-string")(?=>&quot;(.*)&quot;<\/span>:)/g
-                const valueReg = /(?<=: <span class="(hljs-number|hljs-string)")(?=>(.*)<\/span>)/g
-                const arrayReg = /(?<=\[\s*)(\d+\.\s+{{0,1}<span class="(hljs-string|hljs-number)"(>).+<\/span>,*\s*)+\s(?=\d+\.\s+\])/g
+                // const keyReg = /(?<=<span class="hljs-string")(?=>&quot;(.*)&quot;<\/span>:)/g
+                // const valueReg = /(?<=: <span class="(hljs-number|hljs-string)")(?=>(.*)<\/span>)/g
+                const arrayReg = /(?<=<span class="(hljs-string|hljs-number)")(?=>)/g
 
                 const res = item.value
                 .split('\n')
@@ -277,8 +293,10 @@ export default class StarNote {
                 })
                 // key 和 value 打标
                 .map((item,index)=>{
-                    return item.replace(keyReg,` data-atr="key" data-index=${index} `)
-                    .replace(valueReg,` data-atr="value" data-index=${index} `)
+                    return item
+                    // .replace(keyReg,` data-atr="key" data-index=${index} `)
+                    // .replace(valueReg,` data-atr="value" data-index=${index} `)
+                    .replace(arrayReg,` data-atr="value" data-index=${index} `)
                 })
                 // 过滤变更的值加样式标记
                 .map((citem,index)=>{
@@ -288,12 +306,14 @@ export default class StarNote {
                     }
                     return notIndexs.includes(index)? `${index}.${citem.replace(/(hljs-string|hljs-number)"/g,'change-item" ')}`: `${index}.${citem}`
                 })
-                item.value = res.join('\n').replace(arrayReg,(item)=>{
-                    return item.split('\n').map((citem,index)=>{
-                        const reg = /(?<=\d+\.\s+<span class="(hljs-number|hljs-string)")>/g
-                        return citem.replace(reg,' data-atr="arry-value-'+ index +'">')
-                    }).join('\n')
-                })
+                item.value = res.join('\n')
+                // .replace(arrayReg,(item)=>{
+                //     return item.split('\n').map((citem,index)=>{
+                //         const reg = /(?<=\d+\.\s+<span class="(hljs-number|hljs-string)")>/g
+                //         return citem.replace(reg,` data-atr="arry-value-'+ index +'" data-index=${index} >`)
+                //     }).join('\n')
+                    
+                // })
                 oldCode = item.code as string
             }
         })
@@ -315,7 +335,7 @@ export default class StarNote {
                     targetEl.removeAttribute('copy-text')
                 },1000)
 
-            }).catch((err)=>{
+            }).catch(()=>{
            
                 targetEl.setAttribute('copy-text','复制失败')
                 setTimeout(()=>{
@@ -324,12 +344,6 @@ export default class StarNote {
             })
 
         })
-
-
-        
-
-
-
     }
 
     private containerMove(){
@@ -375,6 +389,7 @@ export default class StarNote {
         const jsonshadowpath = JSON.stringify(this.addPath(JSON.parse(JSON.stringify(data))),null,2)
         const shadowPathhj = hljs.highlight(jsonshadowpath,{language:'tp'})
         this.shadowPathData = shadowPathhj.code?.split('\n') as string[]
+
         const json = JSON.stringify(data,null,2)
         const hj = hljs.highlight(json,{language:'javascript'})
        
@@ -444,7 +459,15 @@ export default class StarNote {
 
     public addPath(obj:any, path:any[] = []) {
         if (Array.isArray(obj)) {
-            obj.map((item, idx) => this.addPath(item, [...path, idx]))
+            obj.map((item, idx) => {
+
+                if(typeof item !== 'object' && !Array.isArray(item)){
+                   
+                    obj[idx] = [...path, idx].join(".")
+                }
+
+                this.addPath(item, [...path, idx])
+            })
         } else if (typeof obj === "object") {
             // obj[objectPathKey] = path;
             for (const key in obj) {
@@ -452,6 +475,7 @@ export default class StarNote {
             }
         }
         if(typeof obj !== 'object' && !Array.isArray(obj)){
+            
             obj = path.join(".")
         }
     
