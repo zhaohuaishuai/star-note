@@ -7,6 +7,8 @@
     --code-index-color:#8cdcda;
     --copy-success-text:'复制成功';
     --copy-btn-text:'点击复制';
+    --text-color-menu:#cccccc;
+    --menu-hover-color:#323232;
 }
 
 
@@ -22,15 +24,80 @@
         box-sizing: border-box;
         justify-content: space-between;
         align-items: center;
-        .logo {
-            width: 26px;
-            height: 26px;
-            background-image: url('./logo.png');
-            background-repeat: no-repeat;
-            background-position: center;
-            background-size: 100%;
-            border-radius: 16px;
-            overflow: hidden;
+        
+        .header-left {
+            display: flex;
+            align-items: center;
+            column-gap: 5px;
+            .menu {
+                ul {
+                    display: flex;
+                    row-gap: 5px;
+                    column-gap: 5px;
+                    margin:0px;padding:0px;
+                    box-sizing: border-box;
+                }
+                ul li {
+                    margin:0px;padding:0px;
+                    box-sizing: border-box;
+                    display: block;
+                    list-style: none;
+                    position:relative;
+                    color:var(--text-color-menu);
+
+                    button {
+                        background-color: transparent;
+                        color:inherit;
+                        border:none;
+                        &:focus ~ .sub-menu {
+                            height: 30px;
+                        }
+                    }
+
+                    .sub-menu {
+                        position:absolute;
+                        width:55px;
+                        top:20px;
+                        left:20px;
+                        z-index: 99;
+                        background-color: var(--bg-color-body);
+                        border:1px solid var(--border-color);
+                        color:var(--text-color-menu);
+                        border-radius: 3px;
+                        height: 0px;
+                        overflow: hidden;
+                        transition: height .1s linear;
+                        display: block;
+                        cursor: pointer;
+                        li {
+                            display: block;
+                            text-align: center;
+                            height: 30px;
+                            line-height: 30px;
+                            padding: 0  5px;
+                            border-bottom: 1px solid var(--border-color);
+                            &:hover {
+                                background-color: var(--menu-hover-color);
+                            }
+
+                        }
+                    }
+
+                    
+                    
+                }
+            }
+            .logo {
+                width: 26px;
+                height: 26px;
+                background-image: url('./logo.png');
+                background-repeat: no-repeat;
+                background-position: center;
+                background-size: 100%;
+                border-radius: 16px;
+                overflow: hidden;
+            }
+
         }
         .close {
             width:38px;
@@ -76,7 +143,7 @@
                    padding: 1px 2px;
                 }
 
-                .hljs-string,.hljs-number,.change-item {
+                .hljs-string,.hljs-number,.change-item,.hljs-literal {
                     cursor: pointer;
                     position: relative;
                     &:hover {
@@ -124,6 +191,28 @@
         background-color: var(--bg-color-bar);
         border-bottom: 1px solid var(--border-color);
         box-shadow: 0px 1px 6px gainsboro inset;
+
+        .header-left {
+            .menu {
+                color:#fff;
+                ul {
+    
+                }
+                ul li {
+                    font-size: 12px;
+                    
+                    button {
+                        cursor: pointer;
+                        &:hover {
+                            background-color: var(--menu-hover-color);
+                        }
+                    }
+                    
+                }
+            }
+        }
+
+
         .close {
             color:#cccccc;
             font-size: 17px;
@@ -204,7 +293,7 @@
                 padding: 0px 15px;
                 &:hover {
                     border-radius: 4px;
-                    background-color: #323232;
+                    background-color: var(--menu-hover-color);
                 }
                 span:nth-child(1) {
                     position: relative;

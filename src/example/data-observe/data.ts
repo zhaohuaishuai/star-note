@@ -1,6 +1,7 @@
 
 export const as = {
     "id": 5,
+    a:true,
     "name": "",
     "templateId": 149,
     "advertiserIdList": [

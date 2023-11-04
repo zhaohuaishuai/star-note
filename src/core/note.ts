@@ -167,7 +167,7 @@ export default class StarNote {
                 node.scrollIntoView({block:'center',behavior:'smooth'})
             })
 
-            this.hlContainer.code.querySelectorAll('.hljs-string,.hljs-number,.change-item').forEach((node:any)=>{
+            this.hlContainer.code.querySelectorAll('.hljs-string,.hljs-number,.change-item,.hljs-literal').forEach((node:any)=>{
                 node.addEventListener('mouseenter',(ev:MouseEvent)=>{
                     const target = ev.target as HTMLSpanElement
                     
@@ -283,7 +283,7 @@ export default class StarNote {
                 const reg = /\n*\d*\./g
                 // const keyReg = /(?<=<span class="hljs-string")(?=>&quot;(.*)&quot;<\/span>:)/g
                 // const valueReg = /(?<=: <span class="(hljs-number|hljs-string)")(?=>(.*)<\/span>)/g
-                const arrayReg = /(?<=<span class="(hljs-string|hljs-number)")(?=>)/g
+                const arrayReg = /(?<=<span class="(hljs-string|hljs-number|hljs-literal)")(?=>)/g
 
                 const res = item.value
                 .split('\n')
