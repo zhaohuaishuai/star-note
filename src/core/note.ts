@@ -28,7 +28,9 @@ export default class StarNote {
         logoBtn:document.createElement('div'),
         resizeHandlerBtn:document.createElement('div'),
         footer:document.createElement('div'),
-        popInfo:document.createElement('div')
+        popInfo:document.createElement('div'),
+        menu:document.createElement('div'),
+        headerLeft:document.createElement('div'),
 
 
     }
@@ -91,25 +93,31 @@ export default class StarNote {
                                         </ul>`
         this.dom.body.appendChild(pre)
         pre.appendChild(code)
-        this.dom.header.appendChild(this.dom.logoBtn)
+    
+        this.dom.header.appendChild(this.dom.headerLeft)
+        this.dom.headerLeft.appendChild(this.dom.logoBtn)
+        this.dom.headerLeft.appendChild(this.dom.menu)
+  
         this.dom.header.appendChild(this.dom.closeBtn)
-        
         this.dom.closeBtn.innerHTML = 'x'
         document.body.appendChild(this.dom.container)
+        
         this.initStyle()
+        this.initMenu()
         this.initEvent()
+        
     }
     private initStyle(){
 
-        const {container,header,closeBtn,body,resizeHandlerBtn,logoBtn,footer,popInfo} = this.dom
+        const {container,header,closeBtn,body,resizeHandlerBtn,logoBtn,footer,popInfo,menu,headerLeft} = this.dom
         popInfo.classList.add('pop-info')
-
         container.classList.add('star-container','theme-1')
         header.classList.add('header')
         footer.classList.add('footer')
         closeBtn.classList.add('close')
+        headerLeft.classList.add("header-left")
         logoBtn.classList.add('logo')
-
+        menu.classList.add('menu')
         footer.style.height = this.footerHeight + 'px'
         container.style.zIndex = '9999'
         container.style.width  =  this.containerWidth + 'px'
@@ -122,8 +130,32 @@ export default class StarNote {
         body.classList.add('body')
         body.style.height = (this.containerHeight - this.titleHeight - this.footerHeight) + 'px'
         
-        
+        // 透明度
+        const opacity = localStorage.getItem("star_note_opacity")
+        this.setOpacity(opacity || '1')
         resizeHandlerBtn.classList.add("drag-controll")
+    }
+    private initMenu(){
+
+        let menuHTMLstr =  `<ul>
+                                <li>
+                                    <button id="appearance">外观</button>
+                                    <ul class="sub-menu">
+                                        <li><button data-value="0.2" data-property="opacity">透明度20%</button></li>
+                                        <li><button data-value="0.4" data-property="opacity">透明度40%</button></li>
+                                        <li><button data-value="0.6" data-property="opacity">透明度60%</button></li>
+                                        <li><button data-value="0.8" data-property="opacity">透明度80%</button></li>
+                                        <li><button data-value="1" data-property="opacity">透明度100%</button></li>
+                                    </ul>
+                                </li>
+                            </ul>
+                            `
+
+        this.dom.menu.innerHTML =menuHTMLstr
+
+        
+
+
     }
     // private oldNodeList:any[] = []
     private initEvent(){
@@ -155,6 +187,8 @@ export default class StarNote {
             this.containerMove()
         }
 
+        
+
         closeBtn.onclick =()=>{
             this.dom.container.remove()
         }
@@ -176,16 +210,13 @@ export default class StarNote {
                     const {x:dx,y:dy} = this.dom.container.getBoundingClientRect()
                     x -= dx-10;
                     y -= dy-10;
-                   
-                   
+
                     if(target){
                         type keyType = keyof typeof this.shadowPathData
                         let path = this.shadowPathData[target.dataset.index as keyType] as string
                         const reg = /\s*".+":\s"(.+)",{0,}/g
                         const reg1= /\s*"(.+)": (\[|\{)/g
                         const arrResReg = /(?<=\s*")(.+\.\d)(?=",{0,1})/g
- 
-
                         this.dom.popInfo.classList.add('active')
                         this.dom.popInfo.style.transform = `translate(${x}px, ${y}px)`
                         if(reg.test(path)){
@@ -344,6 +375,41 @@ export default class StarNote {
             })
 
         })
+
+
+        // 给菜单加事件
+        const appearance = this.dom.menu.querySelector('#appearance') as HTMLButtonElement
+        appearance.addEventListener("click",function(e:Event){
+            e.stopPropagation()
+            appearance.setAttribute('status','open')
+        })
+        const optBtns = Array.prototype.slice.call(this.dom.menu.querySelectorAll('button[data-property="opacity"]'))
+        let self = this
+        optBtns.forEach((btn:HTMLButtonElement)=>{
+            console.log(btn)
+            btn.addEventListener('click',function(e:Event){
+                e.stopPropagation()
+                console.log(this.getAttribute("data-property"),this.getAttribute("data-value"))
+                self.setOpacity(this.getAttribute("data-value") as string)
+                appearance.removeAttribute('status')
+            })
+        })
+        window.addEventListener("click",()=>{
+            if(appearance.getAttribute("status") === 'open'){
+                appearance.removeAttribute('status')
+            }
+           
+        })
+
+
+    }
+    /**
+     * 设置透明度
+     * params {string}
+     */
+    setOpacity(val:string){
+        this.dom.container.style.opacity = val
+        localStorage.setItem("star_note_opacity",val)
     }
 
     private containerMove(){

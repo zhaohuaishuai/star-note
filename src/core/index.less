@@ -30,6 +30,7 @@
             align-items: center;
             column-gap: 5px;
             .menu {
+                display: flex;
                 ul {
                     display: flex;
                     row-gap: 5px;
@@ -44,21 +45,20 @@
                     list-style: none;
                     position:relative;
                     color:var(--text-color-menu);
-
                     button {
                         background-color: transparent;
                         color:inherit;
                         border:none;
-                        &:focus ~ .sub-menu {
-                            height: 30px;
+                        &[status="open"] ~ .sub-menu {
+                            height: 180px;
                         }
                     }
-
+                    
                     .sub-menu {
                         position:absolute;
-                        width:55px;
+                        width:130px;
                         top:20px;
-                        left:20px;
+                        left:0px;
                         z-index: 99;
                         background-color: var(--bg-color-body);
                         border:1px solid var(--border-color);
@@ -72,19 +72,19 @@
                         li {
                             display: block;
                             text-align: center;
-                            height: 30px;
                             line-height: 30px;
                             padding: 0  5px;
                             border-bottom: 1px solid var(--border-color);
+                            
                             &:hover {
                                 background-color: var(--menu-hover-color);
                             }
-
+                            button {
+                                width:100%;
+                                height: 100%;
+                            }
                         }
                     }
-
-                    
-                    
                 }
             }
             .logo {
@@ -196,7 +196,7 @@
             .menu {
                 color:#fff;
                 ul {
-    
+                
                 }
                 ul li {
                     font-size: 12px;
