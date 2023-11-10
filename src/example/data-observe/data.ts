@@ -10,10 +10,10 @@ export const as = {
       "1767396488101000"
     ],
     "aa":{
-        "aa-name": "days",
+        "aa-namedaysdaysdaysdaysdaysdaysdaysdaysdaysdays": "daysdaysdaysdaysdaysdaysdaysdaysdaysdays",
         "aa-el": "eq",
-        "aa-value": 30,
-        "aa-relation": ""
+        "aa-value": 30.9,
+        "aa-relation": true
       },
     "newsCondition": [
       {

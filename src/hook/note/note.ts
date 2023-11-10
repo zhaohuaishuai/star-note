@@ -44,6 +44,7 @@ export function useNote(data:Ref<any>){
         window.removeEventListener('dblclick',cr)
     })
     
+    
 
     return 
 }

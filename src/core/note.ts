@@ -68,6 +68,7 @@ export default class StarNote {
     }
 
     private init(){
+ 
         const {pre,code} = this.hlContainer
         // this.dom.container = document.createElement('div')
         // this.dom.header = document.createElement('div')
@@ -136,7 +137,7 @@ export default class StarNote {
         resizeHandlerBtn.classList.add("drag-controll")
     }
     private initMenu(){
-
+      
         let menuHTMLstr =  `<ul>
                                 <li>
                                     <button id="appearance">外观</button>
@@ -311,16 +312,17 @@ export default class StarNote {
                         }
                     }
                 }
-                const reg = /\n*\d*\./g
+                const reg = /^\d+\./
                 // const keyReg = /(?<=<span class="hljs-string")(?=>&quot;(.*)&quot;<\/span>:)/g
                 // const valueReg = /(?<=: <span class="(hljs-number|hljs-string)")(?=>(.*)<\/span>)/g
                 const arrayReg = /(?<=<span class="(hljs-string|hljs-number|hljs-literal)")(?=>)/g
-
+               
                 const res = item.value
                 .split('\n')
                 // 增加索引
-                .map((item)=>{
-                    return item.replace(reg,'')
+                .map((item)=>{ 
+                     
+                    return item.replace(reg,'') 
                 })
                 // key 和 value 打标
                 .map((item,index)=>{
@@ -386,10 +388,9 @@ export default class StarNote {
         const optBtns = Array.prototype.slice.call(this.dom.menu.querySelectorAll('button[data-property="opacity"]'))
         let self = this
         optBtns.forEach((btn:HTMLButtonElement)=>{
-            console.log(btn)
+         
             btn.addEventListener('click',function(e:Event){
                 e.stopPropagation()
-                console.log(this.getAttribute("data-property"),this.getAttribute("data-value"))
                 self.setOpacity(this.getAttribute("data-value") as string)
                 appearance.removeAttribute('status')
             })
